@@ -177,6 +177,8 @@ int zebra_ns_final_shutdown(struct ns *ns,
 
 	kernel_terminate(zns, true);
 
+	zebra_vrf_fini();
+
 	return NS_WALK_CONTINUE;
 }
 

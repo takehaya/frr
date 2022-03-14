@@ -55,6 +55,8 @@ struct other_route_table {
 	struct route_table *table;
 };
 
+PREDECL_HASH(vrf_table_id)
+
 /* Routing table instance.  */
 struct zebra_vrf {
 	/* Back pointer */
@@ -183,6 +185,7 @@ struct zebra_vrf {
 
 	bool zebra_rnh_ip_default_route;
 	bool zebra_rnh_ipv6_default_route;
+	struct vrf_table_id_entry entryhash;
 };
 #define PROTO_RM_NAME(zvrf, afi, rtype) zvrf->proto_rm[afi][rtype].name
 #define NHT_RM_NAME(zvrf, afi, rtype) zvrf->nht_rm[afi][rtype].name
@@ -246,6 +249,24 @@ zvrf_other_table_compare_func(const struct other_route_table *a,
 DECLARE_RBTREE_UNIQ(otable, struct other_route_table, next,
 		    zvrf_other_table_compare_func);
 
+static inline int zebra_vrf_compare_table_id(const struct zebra_vrf *a,
+			       const struct zebra_vrf *b)
+{
+	if (a->table_id < b->table_id)
+		return -1;
+	if (a->table_id > b->table_id)
+		return 1;
+	return 0;
+}
+
+static inline uint32_t zebra_vrf_hash_table_id(const struct zebra_vrf *v)
+{
+	return v->table_id;
+}
+
+DECLARE_HASH(vrf_table_id, struct zebra_vrf, entryhash,
+	     zebra_vrf_compare_table_id, zebra_vrf_hash_table_id)
+
 extern struct route_table *
 zebra_vrf_lookup_table_with_table_id(afi_t afi, safi_t safi, vrf_id_t vrf_id,
 				     uint32_t table_id);
@@ -273,6 +294,7 @@ extern void zebra_vrf_init(void);
 extern void zebra_rtable_node_cleanup(struct route_table *table,
 				      struct route_node *node);
 
+extern struct vrf_table_id_head vrfs_by_table_id;
 #ifdef __cplusplus
 }
 #endif

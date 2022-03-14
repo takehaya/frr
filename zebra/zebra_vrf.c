@@ -57,6 +57,8 @@ static void zebra_rnhtable_node_cleanup(struct route_table *table,
 DEFINE_MTYPE_STATIC(ZEBRA, ZEBRA_VRF, "ZEBRA VRF");
 DEFINE_MTYPE_STATIC(ZEBRA, OTHER_TABLE, "Other Table");
 
+struct vrf_table_id_head vrfs_by_table_id;
+
 /* VRF information update. */
 static void zebra_vrf_add_update(struct zebra_vrf *zvrf)
 {
@@ -164,6 +166,9 @@ static int zebra_vrf_enable(struct vrf *vrf)
 		zvrf->rnh_table_multicast[afi] = table;
 	}
 
+	if (!vrf_is_backend_netns())
+		vrf_table_id_add(&vrfs_by_table_id, zvrf);
+
 	/* Kick off any VxLAN-EVPN processing. */
 	zebra_vxlan_vrf_enable(zvrf);
 
@@ -239,6 +244,9 @@ static int zebra_vrf_disable(struct vrf *vrf)
 			zvrf->table[afi][safi] = NULL;
 		}
 	}
+
+	if (!vrf_is_backend_netns())
+		vrf_table_id_del(&vrfs_by_table_id, zvrf);
 
 	return 0;
 }
@@ -642,7 +650,7 @@ void zebra_vrf_init(void)
 {
 	vrf_init(zebra_vrf_new, zebra_vrf_enable, zebra_vrf_disable,
 		 zebra_vrf_delete);
-
+	vrf_table_id_init(&vrfs_by_table_id);
 	hook_register(zserv_client_close, release_daemon_table_chunks);
 
 	vrf_cmd_init(vrf_config_write);
@@ -652,4 +660,8 @@ void zebra_vrf_init(void)
 		install_element(VRF_NODE, &vrf_netns_cmd);
 		install_element(VRF_NODE, &no_vrf_netns_cmd);
 	}
+}
+
+void zebra_vrf_fini(void){
+	vrf_table_id_fini(&vrfs_by_table_id);
 }
