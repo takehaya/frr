@@ -123,6 +123,8 @@ enum node_type {
 	RFP_DEFAULTS_NODE,       /* RFP defaults node */
 	BGP_EVPN_NODE,		 /* BGP EVPN node. */
 	BGP_SRV6_NODE,		 /* BGP SRv6 node. */
+	BGP_MUPV4_NODE,		/* BGP IPv4 MUP(Mobile User Plane) Address-Family */
+	BGP_MUPV6_NODE,		/* BGP IPv6 MUP(Mobile User Plane) Address-Family */
 	OSPF_NODE,		 /* OSPF protocol mode */
 	OSPF6_NODE,		 /* OSPF protocol for IPv6 mode */
 	LDP_NODE,		 /* LDP protocol mode */

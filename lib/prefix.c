@@ -1072,6 +1072,8 @@ static const char *prefixevpn2str(const struct prefix_evpn *p, char *str,
 	return str;
 }
 
+static const char *prefixmup2str(const struct prefix_ )
+
 const char *prefix2str(union prefixconstptr pu, char *str, int size)
 {
 	const struct prefix *p = pu.p;
@@ -1116,6 +1118,9 @@ const char *prefix2str(union prefixconstptr pu, char *str, int size)
 		strlcpy(str, "FS prefix", size);
 		break;
 
+	case AF_MUP:
+		prefixmup2str()
+		break;
 	default:
 		strlcpy(str, "UNK prefix", size);
 		break;

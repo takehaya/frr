@@ -1361,6 +1361,22 @@ static struct cmd_node zebra_node = {
 };
 
 #ifdef HAVE_BGPD
+static struct cmd_node bgp_mupv4_node = {
+	.name = "bgp ipv4 mup",
+	.node = BGP_MUPV4_NODE,
+	.parent_node = BGP_NODE,
+	.prompt = "%s(config-router-af)# ",
+	.no_xpath = true,
+};
+
+static struct cmd_node bgp_mupv6_node = {
+	.name = "bgp ipv6 mup",
+	.node = BGP_MUPV6_NODE,
+	.parent_node = BGP_NODE,
+	.prompt = "%s(config-router-af)# ",
+	.no_xpath = true,
+};
+
 static struct cmd_node bgp_vpnv4_node = {
 	.name = "bgp vpnv4",
 	.node = BGP_VPNV4_NODE,
@@ -1802,6 +1818,16 @@ DEFUNSH(VTYSH_BGPD, address_family_ipv4_vpn, address_family_ipv4_vpn_cmd,
 	return CMD_SUCCESS;
 }
 
+DEFUNSH(VTYSH_BGPD, address_family_mupv4, address_family_mupv4_cmd,
+	"address-family ipv4 mup",
+	"Enter Address Family command mode\n"
+	BGP_AF_STR
+	BGP_AF_MODIFIER_STR)
+{
+	vty->node = BGP_MUPV4_NODE;
+	return CMD_SUCCESS;
+}
+
 DEFUNSH(VTYSH_BGPD, address_family_ipv4_labeled_unicast,
 	address_family_ipv4_labeled_unicast_cmd,
 	"address-family ipv4 labeled-unicast",
@@ -1840,6 +1866,16 @@ DEFUNSH(VTYSH_BGPD, address_family_ipv6_vpn, address_family_ipv6_vpn_cmd,
 	BGP_AF_MODIFIER_STR)
 {
 	vty->node = BGP_VPNV6_NODE;
+	return CMD_SUCCESS;
+}
+
+DEFUNSH(VTYSH_BGPD, address_family_mupv6, address_family_mupv6_cmd,
+	"address-family ipv6 mup",
+	"Enter Address Family command mode\n"
+	BGP_AF_STR
+	BGP_AF_MODIFIER_STR)
+{
+	vty->node = BGP_MUPV6_NODE;
 	return CMD_SUCCESS;
 }
 
@@ -4733,6 +4769,20 @@ void vtysh_init_vty(void)
 	install_element(BGP_NODE, &vtysh_exit_bgpd_cmd);
 	install_element(BGP_NODE, &vtysh_quit_bgpd_cmd);
 	install_element(BGP_NODE, &vtysh_end_all_cmd);
+
+	install_node(&bgp_mupv4_node);
+	install_element(BGP_NODE, &address_family_mupv4_cmd);
+	install_element(BGP_MUPV4_NODE, &vtysh_exit_bgpd_cmd);
+	install_element(BGP_MUPV4_NODE, &vtysh_quit_bgpd_cmd);
+	install_element(BGP_MUPV4_NODE, &vtysh_end_all_cmd);
+	install_element(BGP_MUPV4_NODE, &exit_address_family_cmd);
+
+	install_node(&bgp_mupv6_node);
+	install_element(BGP_NODE, &address_family_mupv6_cmd);
+	install_element(BGP_MUPV6_NODE, &vtysh_exit_bgpd_cmd);
+	install_element(BGP_MUPV6_NODE, &vtysh_quit_bgpd_cmd);
+	install_element(BGP_MUPV6_NODE, &vtysh_end_all_cmd);
+	install_element(BGP_MUPV6_NODE, &exit_address_family_cmd);
 
 	install_node(&bgp_vpnv4_node);
 	install_element(BGP_NODE, &address_family_ipv4_vpn_cmd);

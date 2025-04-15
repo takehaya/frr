@@ -158,10 +158,74 @@ struct evpn_addr {
 #define AF_FLOWSPEC (AF_MAX + 2)
 #endif
 
+#if !defined(AF_MUP)
+#define AF_MUP (AF_MAX + 3)
+#endif
+
 struct flowspec_prefix {
 	uint8_t family;
 	uint16_t prefixlen; /* length in bytes */
 	uintptr_t ptr;
+};
+
+/* MUP Architecture types. */
+typedef enum {
+	BGP_MUP_ARCH_3GPP_5G = 1, /* 3gpp-5g */
+} bgp_mup_architecture_type;
+
+/* MUP route types. */
+typedef enum {
+	BGP_MUP_ISD_ROUTE = 1, /* Interwork Segment Discovery route */
+	BGP_MUP_DSD_ROUTE,     /* Direct Segment Discovery route */
+	BGP_MUP_T1ST_ROUTE,    /* Type 1 Session Transformed (ST) route */
+	BGP_MUP_T2ST_ROUTE,    /* Type 2 Session Transformed (ST) route */
+} bgp_mup_route_type;
+
+struct mup_isd {
+	uint8_t ip_prefix_length;
+	struct ipaddr ip;
+};
+
+struct mup_dsd {
+	struct ipaddr ip;
+};
+
+struct mup_t1st_3gpp_5g {
+	uint32_t teid;
+	uint8_t qfi;
+	uint8_t endpoint_address_length;
+	struct ipaddr endpoint_address;
+	uint8_t source_address_length;
+	struct ipaddr source_address;
+};
+
+struct mup_t1st {
+	uint8_t ip_prefix_length;
+	struct ipaddr ip;
+	struct mup_t1st_3gpp_5g t1st_3gpp_5g; /* Architecture Type: 3gpp-5g */
+};
+
+struct mup_t2st {
+	uint8_t endpoint_address_length;
+	struct ipaddr endpoint_address;
+	uint32_t teid; /* Architecture Type: 3gpp-5g */
+};
+
+/* MUP prefix (draft-mpmz-bess-mup-safi-03) */
+struct mup_prefix {
+	uint8_t arch_type;
+	uint16_t route_type;
+	uint8_t length;
+	union {
+		struct mup_isd_route _isd_route;
+		struct mup_dsd_route _dsd_route;
+		struct mup_t1st_route _t1st_route;
+		struct mup_t2st_route _t2st_route;
+	} u;
+#define isd_route u._isd_route
+#define dsd_route u._dsd_route
+#define t1st_route u._t1st_route
+#define t2st_route u._t2st_route
 };
 
 /* FRR generic prefix structure. */
@@ -182,6 +246,7 @@ struct prefix {
 		uintptr_t ptr;
 		struct evpn_addr prefix_evpn; /* AF_EVPN */
 		struct flowspec_prefix prefix_flowspec; /* AF_FLOWSPEC */
+		struct mup_prefix prefix_mup; /* AF_MUP */
 	} u __attribute__((aligned(8)));
 };
 
